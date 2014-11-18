@@ -9,10 +9,12 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
+	"runtime"
 	"time"
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	//create logger
 	logger.CreateLogger("logfile")
@@ -40,7 +42,7 @@ func main() {
 	)
 	logger.FailOnError(err, "Failed to register a consumer")
 
-	mariadb := config.MARIADB_USER_PASS + config.MARIADB_PROTOCOL + config.MARIADB_HOST_PORT + config.MARIADB4_DB
+	mariadb := config.MARIADB_USER_PASS + config.MARIADB_PROTOCOL + config.MARIADB_HOST_PORT + config.MARIADB_DB
 
 	// Open database connection
 	db, err := sql.Open("mysql", mariadb)
@@ -48,8 +50,9 @@ func main() {
 		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
 	}
 	defer db.Close()
+	forever := make(chan bool)
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		go func() {
 
 			for d := range msgs {
@@ -92,9 +95,10 @@ func main() {
 				//RabbitMQ Message delete
 				d.Ack(false)
 			}
+
 		}()
 	}
 
-	forever := make(chan bool)
 	<-forever
+
 }
