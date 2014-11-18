@@ -9,12 +9,10 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
-	"runtime"
 	"time"
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	//create logger
 	logger.CreateLogger("logfile")
